@@ -25,6 +25,7 @@ describe('Reviews Endpoints', function() {
   afterEach('cleanup', () => helpers.cleanTables(db))
 
   describe(`POST /api/reviews`, () => {
+    
     beforeEach('insert things', () =>
       helpers.seedThingsTables(
         db,
@@ -32,6 +33,14 @@ describe('Reviews Endpoints', function() {
         testThings,
       )
     )
+
+    it(`responds 401 'Unauthorized request' when invalid password`, () => {
+        const userInvalidPass = { user_name: testUsers[0].user_name, password: 'wrong' }
+        return supertest(app)
+          .post('/api/reviews')
+          .set('Authorization', helpers.makeAuthHeader(userInvalidPass))
+          .expect(401, { error: `Unauthorized request` })
+    })
 
     it(`creates an review, responding with 201 and the new review`, function() {
       this.retries(3)
@@ -45,6 +54,7 @@ describe('Reviews Endpoints', function() {
       }
       return supertest(app)
         .post('/api/reviews')
+        .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
         .send(newReview)
         .expect(201)
         .expect(res => {
@@ -93,6 +103,7 @@ describe('Reviews Endpoints', function() {
 
         return supertest(app)
           .post('/api/reviews')
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
           .send(newReview)
           .expect(400, {
             error: `Missing '${field}' in request body`,
