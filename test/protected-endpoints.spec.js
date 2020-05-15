@@ -57,31 +57,25 @@ describe(`Protected endpoints`, () => {
   
     protectedEndpoints.forEach(endpoint => {
         describe(endpoint.name, () => {
-          it(`responds with 401 'Missing basic token' when no basic token`, () => {
+          it(`responds with 401 'Missing bearer token' when no bearer token`, () => {
             return endpoint.method(endpoint.path)
-              .expect(401, { error: `Missing basic token` })
+              .expect(401, { error: `Missing bearer token` })
           })
   
-          it(`responds 401 'Unauthorized request' when no credentials in token`, () => {
+          it(`responds 401 'Unauthorized request' when invalid JWT secret`, () => {
             const userNoCreds = { user_name: '', password: '' }
             return endpoint.method(endpoint.path)
               .set('Authorization', helpers.makeAuthHeader(userNoCreds))
               .expect(401, { error: `Unauthorized request` })
           })
   
-          it(`responds 401 'Unauthorized request' when invalid user`, () => {
-              const userInvalidCreds = { user_name: 'user-not', password: 'existy' }
+          it(`responds 401 'Unauthorized request' when invalid sub in payload`, () => {
+              const invalidUser = { user_name: 'user-not-existy', id: 1 }
               return endpoint.method(endpoint.path)
-                .set('Authorization', helpers.makeAuthHeader(userInvalidCreds))
+                .set('Authorization', helpers.makeAuthHeader(invalidUser))
                 .expect(401, { error: `Unauthorized request` })
           })
-  
-          it(`responds 401 'Unauthorized request' when invalid password`, () => {
-              const userInvalidPass = { user_name: testUsers[0].user_name, password: 'wrong' }
-              return endpoint.method(endpoint.path)
-                .set('Authorization', helpers.makeAuthHeader(userInvalidPass))
-                .expect(401, { error: `Unauthorized request` })
-          })
+
         })
     })
 
