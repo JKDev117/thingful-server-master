@@ -77,6 +77,7 @@ describe('Auth Endpoints', function() {
           process.env.JWT_SECRET, //secret
           { //configuration object
             subject: testUser.user_name,
+            expiresIn: process.env.JWT_EXPIRY,
             algorithm: 'HS256',
           }
         )
